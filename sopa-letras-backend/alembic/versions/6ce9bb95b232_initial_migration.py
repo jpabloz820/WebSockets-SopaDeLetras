@@ -1,8 +1,8 @@
-"""Initial schema
+"""initial migration
 
-Revision ID: 2fa01ae0e9bc
+Revision ID: 6ce9bb95b232
 Revises: 
-Create Date: 2025-06-06 17:58:29.775012
+Create Date: 2025-06-10 15:06:21.391996
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '2fa01ae0e9bc'
+revision: str = '6ce9bb95b232'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -29,14 +29,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_levels_id'), 'levels', ['id'], unique=False)
     op.create_table('users',
-    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('nickname', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('game_sessions',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('level_id', sa.Integer(), nullable=True),
     sa.Column('time_used', sa.Integer(), nullable=True),
     sa.Column('solved', sa.Boolean(), nullable=True),

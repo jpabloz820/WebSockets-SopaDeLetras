@@ -2,61 +2,61 @@ from pydantic import BaseModel # BaseModel de Pydantic, base para crear modelos 
 from typing import List, Optional
 
 class UserBase(BaseModel):
-	nickname: str
+    nickname: str
 
 class UserCreate(UserBase):
-	pass
-
+    pass
+    
 class User(UserBase):
-	id: str # (strings)
+    id: int
 
-	class Config:
-		orm_mode = True # Habilita orm_mode para trabajar con ORM (Mapeo Objeto-Relacional)
+    class Config:
+        orm_mode = True # Habilita orm_mode para trabajar con ORM (Mapeo Objeto-Relacional)
 
 class LevelBase(BaseModel):
-	name: str
-	time_limit: int
+    name: str
+    time_limit: int
 
 class LevelCreate(LevelBase):
-	pass
+    pass
 
 class Level(LevelBase):
-	id: int
+    id: int
 
-	class Config:
-		orm_mode = True
+    class Config:
+        orm_mode = True
 
 class WordBase(BaseModel):
-	word: str
-	level_id: int
+    word: str
+    level_id: int
 
 class WordCreate(WordBase):
-	pass
+    pass
 
 class Word(WordBase):
-	id: int
+    id: int
 
-	class Config:
-		orm_mode = True
+    class Config:
+        orm_mode = True
 
 class GameSessionBase(BaseModel):
-	user_id: str
-	level_id: int
-	time_used: Optional[int] = 0  # Segundos
-	solved: Optional[bool] = False
+    user_id: int
+    level_id: int
+    time_used: Optional[int] = 0  # Segundos
+    solved: Optional[bool] = False
 
 class GameSessionCreate(GameSessionBase):
-	pass
+    pass
 
 class GameSession(GameSessionBase):
-	id: int
+    id: int
 
-	class Config:
-		orm_mode = True
+    class Config:
+        orm_mode = True
 
 # Para iniciar juego y enviar tablero dinámico y tiempo
 
 class StartGameResponse(BaseModel):
-	board: List[List[str]]
-	time_limit: int
-	words: List[str]
+    board: List[List[str]]
+    time_limit: int
+    words: List[str]
