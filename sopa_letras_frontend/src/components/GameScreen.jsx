@@ -45,7 +45,8 @@ const GameScreen = ({ userId }) => {
       setWords(gameData.words);
       setBoard(gameData.board);
       setFoundWords([]);
-      connectSocket();
+      setTimeElapsed(0);
+      connectSocket(gameData.board, gameData.words);
     };
 
     loadLevel();
@@ -72,16 +73,33 @@ const GameScreen = ({ userId }) => {
     }
   }, [timeElapsed, foundWords, words]);
 
-  const connectSocket = () => {
+  const connectSocket = (boardData, wordsData) => {
+    if (ws.current) ws.current.close();
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
     ws.current = new WebSocket('ws://127.0.0.1:8000/ws/game');
+
     ws.current.onopen = () => {
       console.log('✅ WebSocket conectado');
+      ws.current.send(JSON.stringify({
+        command: 'start',
+        board: boardData,
+        words: wordsData
+      }));
     };
+
     ws.current.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
+
         if (msg.command === 'time') {
           setTimeElapsed(msg.elapsed);
+        } else if (msg.command === 'solve') {
+          const solved = msg.words || [];
+          setFoundWords((prev) => {
+            const nuevas = solved.filter(sw => !prev.some(pw => pw.word === sw.word));
+            return [...prev, ...nuevas];
+          });
         }
       } catch (err) {
         console.warn('Mensaje no JSON:', e.data);
@@ -93,9 +111,9 @@ const GameScreen = ({ userId }) => {
     }, 1000);
   };
 
-  const handleWordFound = (word) => {
+  const handleWordFound = ({ word, path }) => {
     if (!foundWords.some(w => w.word === word)) {
-      setFoundWords([...foundWords, { word }]);
+      setFoundWords([...foundWords, { word, path }]);
     }
   };
 
@@ -107,9 +125,8 @@ const GameScreen = ({ userId }) => {
 
   const restartLevel = () => {
     setDialogOpen(false);
-    setTimeElapsed(0);
-    setFoundWords([]);
-    setLevelIndex((prev) => prev);
+    setGameStarted(false);
+    setTimeout(() => setGameStarted(true), 100); // Re-dispara carga
   };
 
   const solveLevel = () => {
@@ -150,14 +167,17 @@ const GameScreen = ({ userId }) => {
           <Paper sx={{ p: 2, mb: 3 }}>
             <List>
               {Array.isArray(words) ? (
-                words.map((w) => (
-                  <ListItem key={w} disablePadding>
-                    <ListItemText
-                      primary={w}
-                      sx={{ textDecoration: foundWords.some(fw => fw.word === w) ? 'line-through' : 'none' }}
-                    />
-                  </ListItem>
-                ))
+                words.map((w) => {
+                  const found = foundWords.some(fw => fw.word === w);
+                  return (
+                    <ListItem key={w} disablePadding>
+                      <ListItemText
+                        primary={found ? `✅ ${w}` : w}
+                        sx={{ textDecoration: found ? 'line-through' : 'none' }}
+                      />
+                    </ListItem>
+                  );
+                })
               ) : (
                 <ListItem>
                   <ListItemText primary="No hay palabras" />

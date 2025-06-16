@@ -17,14 +17,23 @@ const GameBoard = ({ board, onWordFound, foundWords, targetWords }) => {
   };
 
   const handleMouseUp = () => {
-    isMouseDown.current = false;
-    const word = selectedCells.map(([r, c]) => board[r][c]).join('').toUpperCase();
-    const reversed = word.split('').reverse().join('');
-    if (targetWords.some(w => w === word || w === reversed)) {
-      onWordFound(word);
-    }
-    setSelectedCells([]);
-  };
+  isMouseDown.current = false;
+
+  if (selectedCells.length === 0) return;
+
+  const word = selectedCells.map(([r, c]) => board[r][c]).join('').toUpperCase();
+  const reversed = word.split('').reverse().join('');
+
+  const isMatch = targetWords.some(w => w === word || w === reversed);
+  if (isMatch) {
+    onWordFound({
+      word: word,
+      path: [...selectedCells]
+    });
+  }
+
+  setSelectedCells([]);
+};
 
   const isCellSelected = (row, col) => selectedCells.some(([r, c]) => r === row && c === col);
   const isCellFound = (row, col) => {
